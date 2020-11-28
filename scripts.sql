@@ -2,6 +2,8 @@ CREATE DATABASE curseiros;
 
 CREATE TABLE tb_usuario(
 	usuario_pk INTEGER NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR (30) NOT NULL,
+    flAdministrador CHAR DEFAULT 'N',
     login VARCHAR(20) NOT NULL,
     senha VARCHAR(20) NOT NULL
 );

@@ -19,8 +19,8 @@
 
             <form action="homeUsuario.php" method="post" class="center">
 
-                <input class="acessar center block" type="text" name="user">
-                <input class="acessar center block" type="password" name="senha">
+                <input class="acessar center block" type="text" name="user" required>
+                <input class="acessar center block" type="password" name="senha" required>
 
                 <div>
                     <button type="submit" class="botaoRoxo">Entrar</button>

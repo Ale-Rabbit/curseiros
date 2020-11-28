@@ -1,3 +1,63 @@
+
+<?php 
+
+$aparecerCadastrese = false;
+if (isset($_POST) && !empty($_POST)) {
+
+    try {
+
+        $conexao = new PDO("mysql:dbname=curseiros;host=localhost","root","");
+
+        // PROCESSO DE LOGIN
+        if ( !(empty($_POST['user'])) && !(empty($_POST['senha'])) ) {
+
+            $login = $_POST['user'];
+            $senha = $_POST['senha'];
+            
+            $stmt = $conexao->prepare("SELECT flAdministrador FROM tb_usuario WHERE login = :login AND senha = :senha ");
+            $stmt->execute(array(':login' => $login, ':senha' => $senha));
+            
+            $retorno = $stmt->fetchall(PDO::FETCH_ASSOC);
+            
+            if (isset($retorno) && !empty($retorno)) {
+                
+                foreach ($retorno as $row) {
+                    foreach ($row as $key => $value) {
+                        if ($value == 'N') {
+                            $msgErro = "Ei! Você não é um Administrador.";
+                            break;
+                        }
+                    }
+                }
+
+                
+            } else {
+                $msgErro = "Usuário inválido.";
+                $aparecerCadastrese = true;
+            }
+
+        }
+
+        // PROCESSO DE CARREGAMENTO DO CURSO
+        $stmt = $conexao->prepare("SELECT nome, descricao, imagem FROM tb_curso");
+
+        $stmt->execute();
+        $cursos = $stmt->fetchall(PDO::FETCH_ASSOC);
+
+        $carregouCursos = false;
+        if (isset($cursos) && !empty($cursos)) {
+            $carregouCursos = true;
+        } else {
+            $msgErro = "Ainda não possui nenhum curso cadastrado. Entre em contato com algum administrador";
+        }
+
+    } catch ( PDOException $e ) {
+        $msgErro = "Erro em conexão com banco: ".$e->getMessage();
+    }       
+
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,73 +79,78 @@
 
             <div>
 
-                <h2>Todos os cursos</h2>
+                <?php 
+                    if ($aparecerCadastrese && isset($msgErro)) {
+                ?>
+                    <p class="erro center"> <?php echo "$msgErro" ?> </p>
+                    <p class="erro center"> <a href="loginAdm.php">tente novamente</a> ou </p>
+                    <p class="erro center"> <a href="novoAdm.php">faça um cadastro</a></p>
+                <?php 
+                    } elseif (isset($msgErro)) {
+                ?>
+                    <p class="erro center"> <?php echo "$msgErro" ?> </p>
+                    <p class="erro center"> <a href="../index.html">Voltar para página inicial</a></p>
+                <?php
+                    } else {
+                ?>
+                    <h2>Todos os cursos</h2>
 
-                <!-- <p>Ainda não possui nenhum curso cadastrado. Entre em contato com algum administrador</p>-->
+                    <?php 
+                        if (isset($msgErro)) {
+                    ?>
+                            <p class="erro center"> <?php echo "$msgErro" ?> </p>
 
-                <div>
+                    <?php 
+                        }
+                        if (isset($carregouCursos) && $carregouCursos) {
+                    ?>
+                            <div>
+        
+                                <form action="homeAdm.php" method="post">
 
-                    <!-- <p>Curso xxx incluido com sucesso</p> -->
+                                    <ul>
 
-                    <form action="homeAdm.php" method="post">
-                        <ul>
-    
-                            <li>
-                                <input type="checkbox" name="apagar" value="curso1"/> Apagar
-                                <h3>Título do curso 1</h3>
-                                <div>
-                                    <img src="" alt="Imagem do curso 1">
-                                </div>
-                                <p>Descrição do curso 1</p>
-                            </li>
-                            <li>
-                                <input type="checkbox" name="apagar" value="curso2"/> Apagar
-                                <h3>Título do curso 2</h3>
-                                <div>
-                                    <img src="" alt="Imagem do curso 2">
-                                </div>
-                                <p>Descrição do curso 2</p>
-                            </li>
-                            <li>
-                                <input type="checkbox" name="apagar" value="curso3"/> Apagar
-                                <h3>Título do curso 3</h3>
-                                <div>
-                                    <img src="" alt="Imagem do curso 3">
-                                </div>
-                                <p>Descrição do curso 3</p>
-                            </li>
-                            <li>
-                                <input type="checkbox" name="apagar" value="curso4"/> Apagar
-                                <h3>Título do curso 4</h3>
-                                <div>
-                                    <img src="" alt="Imagem do curso 4">
-                                </div>
-                                <p>Descrição do curso 4</p>
-                            </li>
-                            <li>
-                                <input type="checkbox" name="apagar" value="curso5"/> Apagar
-                                <h3>Título do curso 5</h3>
-                                <div>
-                                    <img src="" alt="Imagem do curso 5">
-                                </div>
-                                <p>Descrição do curso 5</p>
-                            </li>
-                            
-                        </ul>
+                                    <?php 
+                                        foreach ($cursos as $row) {
+                                        $valores = array_values ($row);
+                                    ?>  
+                                            <li>
+                                                <input type="checkbox" name="apagar" value="curso1"/> Apagar
+                                                <h3><?php print_r($valores[0]);?></h3>
+                                                <div>
+                                                    <img src="<?php print_r($valores[2]);?>" alt="Imagem do curso">
+                                                </div>
+                                                <p><?php print_r($valores[1]);?></p>
+                                            </li>
+                                    <?php
+                                        }
+                                    ?>
+                                        
+                                    </ul>
+        
+                                    <div>
+                                        <button type="submit">Executar exclusões</button>
+                                    </div>
+        
+                                </form>
+        
+                            </div>
 
-                        <div>
-                            <button type="submit">Executar exclusões</button>
-                        </div>
-                        
-                        <!-- <p>Você deve selecionar um curso se deseja excluir </p>-->
+                    <?php 
+                        } else {
+                    ?>
+                        <p class="erro center"> <?php echo "$msgErro"; ?> </p>
+                    <?php
+                        }
+                    }
+                    ?>
+                    
 
-                    </form>
+                    <a href="novoCurso.php" class="inlineBlock botaoRoxo"><p>Cadastrar novo curso</p></a>
 
-                </div>
 
             </div>
 
-            <a href="novoCurso.php" class="inlineBlock botaoRoxo"><p>Cadastrar novo curso</p></a>
 
         </div>
 
