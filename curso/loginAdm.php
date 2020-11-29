@@ -22,6 +22,8 @@
                 <input class="acessar center block" type="text" name="user" required>
                 <input class="acessar center block" type="password" name="senha" required>
 
+                <input hidden="true" type="checkbox" name="vindoDaPaginaLogarAdm" checked>
+
                 <div>
                     <button type="submit" class="botaoRoxo">Entrar</button>
                 </div>

@@ -1,61 +1,78 @@
 
 <?php 
 
-$aparecerCadastrese = false;
-if (isset($_POST) && !empty($_POST)) {
+    $aparecerCadastrese = false;
+    $vindoDaPaginaLogarAdm = !(empty($_POST['vindoDaPaginaLogarAdm']));
 
     try {
 
         $conexao = new PDO("mysql:dbname=curseiros;host=localhost","root","");
+        
+        if ($vindoDaPaginaLogarAdm && isset($_POST) && !empty($_POST)) {
 
-        // PROCESSO DE LOGIN
-        if ( !(empty($_POST['user'])) && !(empty($_POST['senha'])) ) {
+            // PROCESSO DE LOGIN
+            if ( !(empty($_POST['user'])) && !(empty($_POST['senha'])) ) {
 
-            $login = $_POST['user'];
-            $senha = $_POST['senha'];
-            
-            $stmt = $conexao->prepare("SELECT flAdministrador FROM tb_usuario WHERE login = :login AND senha = :senha ");
-            $stmt->execute(array(':login' => $login, ':senha' => $senha));
-            
-            $retorno = $stmt->fetchall(PDO::FETCH_ASSOC);
-            
-            if (isset($retorno) && !empty($retorno)) {
+                $login = $_POST['user'];
+                $senha = $_POST['senha'];
                 
-                foreach ($retorno as $row) {
-                    foreach ($row as $key => $value) {
-                        if ($value == 'N') {
-                            $msgErro = "Ei! Você não é um Administrador.";
-                            break;
+                $stmt = $conexao->prepare("SELECT flAdministrador FROM tb_usuario WHERE login = :login AND senha = :senha ");
+                $stmt->execute(array(':login' => $login, ':senha' => $senha));
+                
+                $retorno = $stmt->fetchall(PDO::FETCH_ASSOC);
+                
+                if (isset($retorno) && !empty($retorno)) {
+                    
+                    foreach ($retorno as $row) {
+                        foreach ($row as $key => $value) {
+                            if ($value == 'N') {
+                                $msgErro = "Ei! Você não é um Administrador.";
+                                break;
+                            }
                         }
                     }
+
+                    
+                } else {
+                    $msgErro = "Usuário inválido.";
+                    $aparecerCadastrese = true;
                 }
 
-                
-            } else {
-                $msgErro = "Usuário inválido.";
-                $aparecerCadastrese = true;
             }
 
-        }
+            // PROCESSO DE CARREGAMENTO DO CURSO
+            $stmt = $conexao->prepare("SELECT nome, descricao, imagem FROM tb_curso");
 
-        // PROCESSO DE CARREGAMENTO DO CURSO
-        $stmt = $conexao->prepare("SELECT nome, descricao, imagem FROM tb_curso");
+            $stmt->execute();
+            $cursos = $stmt->fetchall(PDO::FETCH_ASSOC);
 
-        $stmt->execute();
-        $cursos = $stmt->fetchall(PDO::FETCH_ASSOC);
-
-        $carregouCursos = false;
-        if (isset($cursos) && !empty($cursos)) {
-            $carregouCursos = true;
+            $carregouCursos = false;
+            if (isset($cursos) && !empty($cursos)) {
+                $carregouCursos = true;
+            } else {
+                $msgErro = "Ainda não possui nenhum curso cadastrado. Entre em contato com algum administrador";
+            }
+            
         } else {
-            $msgErro = "Ainda não possui nenhum curso cadastrado. Entre em contato com algum administrador";
+
+            // PROCESSO DE CARREGAMENTO DO CURSO
+            $stmt = $conexao->prepare("SELECT nome, descricao, imagem FROM tb_curso");
+
+            $stmt->execute();
+            $cursos = $stmt->fetchall(PDO::FETCH_ASSOC);
+
+            $carregouCursos = false;
+            if (isset($cursos) && !empty($cursos)) {
+                $carregouCursos = true;
+            } else {
+                $msgErro = "Ainda não possui nenhum curso cadastrado. Entre em contato com algum administrador";
+            }
+
         }
 
     } catch ( PDOException $e ) {
         $msgErro = "Erro em conexão com banco: ".$e->getMessage();
     }       
-
-}
 ?>
 
 <!DOCTYPE html>
@@ -118,7 +135,7 @@ if (isset($_POST) && !empty($_POST)) {
                                                 <input type="checkbox" name="apagar" value="curso1"/> Apagar
                                                 <h3><?php print_r($valores[0]);?></h3>
                                                 <div>
-                                                    <img src="<?php print_r($valores[2]);?>" alt="Imagem do curso">
+                                                    <img src="<?php print_r("data:image/png;base64,".$valores[2]);?>" alt="Imagem do curso">
                                                 </div>
                                                 <p><?php print_r($valores[1]);?></p>
                                             </li>
@@ -139,15 +156,19 @@ if (isset($_POST) && !empty($_POST)) {
                     <?php 
                         } else {
                     ?>
-                        <p class="erro center"> <?php echo "$msgErro"; ?> </p>
+                        <p class="erro center"> <?php echo isset($msgErro) ? "$msgErro" : ""; ?> </p>
                     <?php
                         }
                     }
                     ?>
                     
-
-                    <a href="novoCurso.php" class="inlineBlock botaoRoxo"><p>Cadastrar novo curso</p></a>
-
+                    <?php 
+                        if (!isset($msgErro)) {
+                    ?>
+                            <a href="novoCurso.php" class="inlineBlock botaoRoxo"><p>Cadastrar novo curso</p></a>
+                    <?php 
+                        }
+                    ?>
 
             </div>
 

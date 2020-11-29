@@ -1,3 +1,51 @@
+
+<?php 
+
+$sucesso = false;
+
+if (isset($_POST) &&
+    !empty($_POST) &&
+    !(empty($_POST['titulo'])) && 
+    !(empty($_FILES['imagemCurso'])) && 
+    !(empty($_POST['descricao']))) {
+
+    try {
+
+        $conexao = new PDO("mysql:dbname=curseiros;host=localhost","root","");
+
+        $titulo = $_POST['titulo'];
+        $descricao = $_POST['descricao'];
+        $imagem = $_FILES['imagemCurso']["tmp_name"];
+
+        $imagemCursoEncode = base64_encode(file_get_contents($imagem));
+        
+        $query = $conexao->prepare("INSERT INTO tb_curso (nome, descricao, imagem) 
+                                    VALUES (:nome, :descricao, :imagem)");
+                    
+        $query->bindParam(":nome",$titulo);
+        $query->bindParam(":descricao",$descricao);
+        $query->bindParam(":imagem",$imagemCursoEncode);
+        
+        $result = $query->execute();
+        
+        $tituloNovoCurso = $_POST['titulo'];
+
+        if(!$result){
+
+            $erro = $query->errorInfo()[1];
+            $msgErro = "Erro ao inserir curso: $erro";
+            
+        } else {
+            $sucesso = true;
+        }
+
+    } catch ( PDOException $e ) {
+        $msgErro = "Erro em conexão com banco: ".$e->getMessage();
+    }       
+
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,12 +65,26 @@
 
         <div>
 
-            <form action="homeAdm.php" method="post" enctype="multipart/form-data" class="center">
+            <?php 
+                if (isset($msgErro)) {
+            ?>  
+                <p class="erro center"> <?php echo "$msgErro" ?> </p>
+                <p class="erro center"> <a href="homeAdm.php"> Ir para cursos</a> </p>
 
-                <input class="acessar center block" type="text" name="titulo" placeholder="Título">
-                <input type="file" name="imagemCurso">
+            <?php
+                } else if($sucesso) {
+            ?>
+                <p> <?php echo isset($nomeUsuario) ? "Curso $tituloNovoCurso inserido com sucesso!" : "Curso inserido" ?> </p>
 
-                <textarea maxlength= "200" name="descricao" rows="5" cols="33" placeholder="breve descrição sobre o curso "></textarea>
+            <?php
+                }
+            ?>
+
+            <form enctype="multipart/form-data" action="novoCurso.php" method="post" class="center">
+
+                <input class="acessar center block" type="text" name="titulo" placeholder="Título" required>
+                <input type="file" name="imagemCurso" required>
+                <textarea maxlength= "200" name="descricao" rows="5" cols="33" placeholder="breve descrição sobre o curso " required></textarea>
 
                 <div>
                     <button type="submit" class="botaoRoxo">Enviar</button>
