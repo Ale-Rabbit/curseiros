@@ -41,7 +41,7 @@
             }
 
             // PROCESSO DE CARREGAMENTO DO CURSO
-            $stmt = $conexao->prepare("SELECT nome, descricao, imagem FROM tb_curso");
+            $stmt = $conexao->prepare("SELECT * FROM tb_curso");
 
             $stmt->execute();
             $cursos = $stmt->fetchall(PDO::FETCH_ASSOC);
@@ -53,10 +53,27 @@
                 $msgErro = "Ainda não possui nenhum curso cadastrado. Entre em contato com algum administrador";
             }
             
+            $vindoDaPaginaLogarAdm = false;
+
         } else {
 
+            // PROCESSO DE EXCLUSÃO DO CURSO
+            if (!(empty($_POST['apagar']))) {
+
+                foreach ($_POST['apagar'] as $pkCursoParaApagar) {
+                    $stmt = $conexao->prepare("DELETE FROM tb_curso WHERE curso_pk = :curso");
+                    $stmt->execute(array(':curso' => $pkCursoParaApagar));
+
+                    if ($stmt == false) {
+                        $msgErro = "Erro ao excluir curso $pkCursoParaApagar";
+                    }
+
+                }
+
+            }
+
             // PROCESSO DE CARREGAMENTO DO CURSO
-            $stmt = $conexao->prepare("SELECT nome, descricao, imagem FROM tb_curso");
+            $stmt = $conexao->prepare("SELECT * FROM tb_curso");
 
             $stmt->execute();
             $cursos = $stmt->fetchall(PDO::FETCH_ASSOC);
@@ -107,6 +124,7 @@
                 ?>
                     <p class="erro center"> <?php echo "$msgErro" ?> </p>
                     <p class="erro center"> <a href="../index.html">Voltar para página inicial</a></p>
+                    <a href="novoCurso.php" class="inlineBlock botaoRoxo"><p>Cadastrar novo curso</p></a>
                 <?php
                     } else {
                 ?>
@@ -126,18 +144,17 @@
                                 <form action="homeAdm.php" method="post">
 
                                     <ul>
-
                                     <?php 
                                         foreach ($cursos as $row) {
-                                        $valores = array_values ($row);
-                                    ?>  
+                                        $valores = array_values($row);
+                                    ?>
                                             <li>
-                                                <input type="checkbox" name="apagar" value="curso1"/> Apagar
-                                                <h3><?php print_r($valores[0]);?></h3>
+                                                <input type="checkbox" name="apagar[]" value="<?php print_r($valores[0]);?>"/> Apagar
+                                                <h3><?php print_r($valores[1]);?></h3>
                                                 <div>
-                                                    <img src="<?php print_r("data:image/png;base64,".$valores[2]);?>" alt="Imagem do curso">
+                                                    <img src="<?php print_r("data:image/png;base64,".$valores[3]);?>" alt="Imagem do curso">
                                                 </div>
-                                                <p><?php print_r($valores[1]);?></p>
+                                                <p><?php print_r($valores[2]);?></p>
                                             </li>
                                     <?php
                                         }
