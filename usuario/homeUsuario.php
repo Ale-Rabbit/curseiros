@@ -1,15 +1,18 @@
 
-<?php 
+<?php
 
     $aparecerCadastrese = false;
-    if (isset($_POST) && !empty($_POST)) {
+    if (isset($_POST)) {
 
         try {
 
             $conexao = new PDO("mysql:dbname=curseiros;host=localhost","root","");
 
             // PROCESSO DE LOGIN
-            if ( !(empty($_POST['user'])) && !(empty($_POST['senha'])) ) {
+            if ( isset($_POST['user']) &&
+                 isset($_POST['senha']) &&
+                 (!empty($_POST['user'])) &&
+                 (!empty($_POST['senha'])) ) {
 
                 $login = $_POST['user'];
                 $senha = $_POST['senha'];
@@ -23,15 +26,77 @@
                     
                     foreach ($retorno as $row){
                         foreach ($row as $key => $value) {
-                            $nomeUsuario = $value;
+                            setcookie("PK_USUARIO_ATUAL", $value, time() + 30000);
+                            break;
                         }
                     }
                     
                 } else {
-                    $msgErro = "Usuário inválido.";
+                    $msgErroUsuario = "Usuário inválido.";
                     $aparecerCadastrese = true;
                 }
 
+            } else {
+
+                // PROCESSO DE INSERIR CURSOS PARA USUÁRIO
+                if ( isset($_POST['cursosParaFazer']) && !(empty($_POST['cursosParaFazer'])) ) {
+
+                    foreach ($_POST['cursosParaFazer'] as $pkCursoParaFazer) {
+
+                        $query = $conexao->prepare("INSERT INTO tb_curso_usuario (fk_usuario, fk_curso)
+                                                   VALUES (:fkUsuario, :fkCurso)");
+
+                        $PkUsuario = json_decode($_COOKIE["PK_USUARIO_ATUAL"]);
+
+                        $query->bindParam(":fkUsuario", $PkUsuario);
+                        $query->bindParam(":fkCurso", $pkCursoParaFazer);
+
+                        $cursoInserido = $query->execute();
+
+                        if (!$cursoInserido){
+
+                            $erro = $query->errorInfo()[0];
+                            $msgErroParaCadastrar = "Erro ao inserir curso $pkCursoParaFazer";
+
+                        }
+
+                    }
+
+                } else {
+                    $msgErroParaCadastrar = "Você deve selecionar algum curso para fazer.";
+                }
+
+            }
+
+            // PROCESSO DE CARREGAMENTO DE CURSOS DISPONÍVEIS
+            $stmt = $conexao->prepare("SELECT c.* FROM tb_curso c 
+                                       WHERE c.curso_pk NOT IN 
+                                            (SELECT cu.fk_curso FROM tb_curso_usuario cu WHERE fk_usuario = :fk_usuario_atual);");
+
+            $stmt->execute(array(':fk_usuario_atual' => json_decode($_COOKIE["PK_USUARIO_ATUAL"])));
+            $cursosDisponiveis = $stmt->fetchall(PDO::FETCH_ASSOC);
+
+            $carregouCursosDisponiveis = false;
+            if (isset($cursosDisponiveis) && !empty($cursosDisponiveis)) {
+                $carregouCursosDisponiveis = true;
+            } else {
+                $msgErroCursosDisponiveis = "Uau! Você já está cadastrado em todos os cursos.";
+            }
+
+            // PROCESSO DE CARREGAMENTO DE CURSOS JÁ MATRICULADO
+            $stmt = $conexao->prepare("SELECT c.* FROM tb_curso c 
+                                       WHERE c.curso_pk IN 
+                                            (SELECT cu.fk_curso FROM tb_curso_usuario cu WHERE fk_usuario = :fk_usuario_atual);");
+
+            $stmt->execute(array(':fk_usuario_atual' => json_decode($_COOKIE["PK_USUARIO_ATUAL"])));
+            $cursosMatriculados = $stmt->fetchall(PDO::FETCH_ASSOC);
+
+            $carregouCursosMatriculados = false;
+
+            if (isset($cursosMatriculados) && !empty($cursosMatriculados)) {
+                $carregouCursosMatriculados = true;
+            } else {
+                $msgErroCursosMatriculados = "Você não esta fazendo nenhum curso. ";
             }
 
         } catch ( PDOException $e ) {
@@ -62,141 +127,118 @@
             <div>
 
                 <?php 
-                    if ($aparecerCadastrese && isset($msgErro)) {
+                    if ($aparecerCadastrese && isset($msgErroUsuario)) {
                 ?>
-                    <p class="erro center"> <?php echo "$msgErro" ?> </p>
+                    <p class="erro center"> <?php echo "$msgErroUsuario" ?> </p>
                     <p class="erro center"> <a href="loginUsuario.php">tente novamente</a> ou </p>
                     <p class="erro center"> <a href="novoUsuario.php">faça um cadastro</a> </p>
-                <?php 
-                    } elseif (isset($msgErro)) {
+
+                <?php
+                    } else if(isset($msgErro)) {
                 ?>
                     <p class="erro center"> <?php echo "$msgErro" ?> </p>
-                    <p class="erro center"> <a href="../index.html">Voltar para página inicial</a></p>
                 <?php
-                    } else{
+                    } else {
                 ?>
+
+                    <?php
+                        if ( isset($msgErroParaCadastrar)) {
+                    ?>
+                        <p class="erro center"> <?php echo "$msgErroParaCadastrar" ?> </p>
+                    <?php
+                        }
+                    ?>
 
                     <h2>Cursos disponíveis</h2>
 
-                    <!-- <p>Ainda não possui nenhum curso cadastrado. Entre em contato com algum administrador</p>-->
-
-                    <div>
-
-                        <form action="homeUsuario.php" method="post">
-                            <ul>
-
-                                <li>
-                                    <input type="checkbox" name="curso" value="curso1"/>
-                                    <h3>Título do curso 1</h3>
-                                    <div>
-                                        <img src="" alt="Imagem do curso 1">
-                                    </div>
-                                    <p>Descrição do curso 1</p>
-                                </li>
-                                <li>
-                                    <input type="checkbox" name="curso" value="curso2"/>
-                                    <h3>Título do curso 2</h3>
-                                    <div>
-                                        <img src="" alt="Imagem do curso 2">
-                                    </div>
-                                    <p>Descrição do curso 2</p>
-                                </li>
-                                <li>
-                                    <input type="checkbox" name="curso" value="curso3"/>
-                                    <h3>Título do curso 3</h3>
-                                    <div>
-                                        <img src="" alt="Imagem do curso 3">
-                                    </div>
-                                    <p>Descrição do curso 3</p>
-                                </li>
-                                <li>
-                                    <input type="checkbox" name="curso" value="curso4"/>
-                                    <h3>Título do curso 4</h3>
-                                    <div>
-                                        <img src="" alt="Imagem do curso 4">
-                                    </div>
-                                    <p>Descrição do curso 4</p>
-                                </li>
-                                <li>
-                                    <input type="checkbox" name="curso" value="curso5"/>
-                                    <h3>Título do curso 5</h3>
-                                    <div>
-                                        <img src="" alt="Imagem do curso 5">
-                                    </div>
-                                    <p>Descrição do curso 5</p>
-                                </li>
-                                
-                            </ul>
+                    <?php
+                        if ( isset($carregouCursosDisponiveis) && !$carregouCursosDisponiveis && isset($msgErroCursosDisponiveis)) {
+                    ?>
+                        <p class="erro center"> <?php echo "$msgErroCursosDisponiveis" ?> </p>
+                    <?php
+                        } else { ?>
 
                             <div>
-                                <button type="submit">Fazer esse curso</button>
+
+                                <form action="homeUsuario.php" method="post">
+                                    <ul>
+
+                                    <?php
+                                        foreach ($cursosDisponiveis as $row) {
+                                        $valores = array_values($row);
+                                    ?>
+                                            <li>
+                                                <input type="checkbox" name="cursosParaFazer[]" value="<?php print_r($valores[0]);?>"/> Fazer este curso
+                                                <h3><?php print_r($valores[1]);?></h3>
+                                                <div>
+                                                    <img src="<?php print_r("data:image/png;base64,".$valores[3]);?>" alt="Imagem do curso">
+                                                </div>
+                                                <p><?php print_r($valores[2]);?></p>
+                                            </li>
+                                    <?php
+                                        }
+                                    ?>
+
+                                    </ul>
+
+                                    <div>
+                                        <button type="submit">Fazer cursos selecionados</button>
+                                    </div>
+
+                                </form>
+
                             </div>
-                            
-                            <!-- <p>Você deve selecionar um curso para fazer</p>-->
 
-                        </form>
+                    <?php
+                        }
+                    ?>
 
-                    </div>
+                    <h2>Cursos matriculados</h2>
 
-                    <h2>Cursos matriculado</h2>
+                    <?php
+                        if ( isset($carregouCursosMatriculados) && !$carregouCursosMatriculados && isset($msgErroCursosMatriculados)) {
+                    ?>
+                        <p class="erro center"> <?php echo "$msgErroCursosMatriculados" ?> </p>
+                    <?php
+                        } else { ?>
 
-                    <!-- <p>Você ainda não esta matriculado em nenhum curso</p>-->
+                            <div>
 
-                    <div>
+                                <ul>
 
-                        <ul>
+                                    <?php
+                                        foreach ($cursosMatriculados as $row) {
+                                        $valores = array_values($row);
+                                    ?>
+                                        <li>
+                                            <h3><?php print_r($valores[1]);?></h3>
+                                            <div>
+                                                <img src="<?php print_r("data:image/png;base64,".$valores[3]);?>" alt="Imagem do curso">
+                                            </div>
 
-                            <li>
-                                <h3>Título do curso 1</h3>
-                                <div>
-                                    <img src="" alt="Imagem do curso 1">
-                                </div>
+                                            <form action="certificado.php" method="post" target="_blank">
+                                                <input type="radio" name="concluir" value="<?php print_r($valores[0]);?>" required /> Concluir
+                                                <div>
+                                                    <button type="submit">Gerar certificado</button>
+                                                </div>
+                                            </form>
 
-                                <form action="certificado.php" method="post" target="_blank">
-                                    <input type="radio" name="concluir" value="curso1" required /> Concluir
-                                    <div>
-                                        <button type="submit">Gerar certificado</button>
-                                    </div>
-                                </form>
+                                        </li>
+                                    <?php
+                                        }
+                                    ?>
 
-                            </li>
-                            <li>
-                                <h3>Título do curso 2</h3>
-                                <div>
-                                    <img src="" alt="Imagem do curso 2">
-                                </div>
+                                </ul>
 
-                                <form action="certificado.php" method="post" target="_blank">
-                                    <input type="radio" name="concluir" value="curso1" required /> Concluir
-                                    <div>
-                                        <button type="submit">Gerar certificado</button>
-                                    </div>
-                                </form>
+                            </div>
 
-                            </li>
-                            <li>
-                                <h3>Título do curso 3</h3>
-                                <div>
-                                    <img src="" alt="Imagem do curso 3">
-                                </div>
-
-                                <form action="certificado.php" method="post" target="_blank">
-                                    <input type="radio" name="concluir" value="curso1" required /> Concluir
-                                    <div>
-                                        <button type="submit">Gerar certificado</button>
-                                    </div>
-                                </form>
-                                
-                            </li>
-
-                        </ul>
-
-                    </div>
+                    <?php
+                        }
+                    ?>
 
                 <?php
                     }
                 ?>
-
 
             </div>
 
