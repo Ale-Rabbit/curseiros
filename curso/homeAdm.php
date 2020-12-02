@@ -2,7 +2,7 @@
 <?php 
 
     $aparecerCadastrese = false;
-    $vindoDaPaginaLogarAdm = !(empty($_POST['vindoDaPaginaLogarAdm']));
+    $vindoDaPaginaLogarAdm = isset($_POST['vindoDaPaginaLogarAdm']) && !(empty($_POST['vindoDaPaginaLogarAdm']));
 
     try {
 
@@ -26,7 +26,7 @@
                     foreach ($retorno as $row) {
                         foreach ($row as $key => $value) {
                             if ($value == 'N') {
-                                $msgErro = "Ei! Você não é um Administrador.";
+                                $msgErroUsuarioComum = "Ei! Você não é um Administrador.";
                                 break;
                             }
                         }
@@ -69,6 +69,8 @@
                     }
 
                 }
+
+                $_POST['apagar'] = array();
 
             }
 
@@ -119,6 +121,11 @@
                     <p class="erro center"> <?php echo "$msgErro" ?> </p>
                     <p class="erro center"> <a href="loginAdm.php">tente novamente</a> ou </p>
                     <p class="erro center"> <a href="novoAdm.php">faça um cadastro</a></p>
+                <?php
+                    } elseif (isset($msgErroUsuarioComum)) {
+                ?>
+                <p class="erro center"> <?php echo "$msgErroUsuarioComum" ?> </p>
+                <p class="erro center"> <a href="../index.html">Voltar para página inicial</a></p>
                 <?php 
                     } elseif (isset($msgErro)) {
                 ?>
@@ -182,7 +189,7 @@
                     <?php 
                         if (!isset($msgErro)) {
                     ?>
-                            <a href="novoCurso.php" class="inlineBlock botaoRoxo"><p>Cadastrar novo curso</p></a>
+                            <!-- <a href="novoCurso.php" class="inlineBlock botaoRoxo"><p>Cadastrar novo curso</p></a> -->
                     <?php 
                         }
                     ?>

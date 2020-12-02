@@ -17,7 +17,7 @@
                 $login = $_POST['user'];
                 $senha = $_POST['senha'];
                 
-                $stmt = $conexao->prepare("SELECT usuario_pk FROM tb_usuario WHERE login = :login AND senha = :senha ");
+                $stmt = $conexao->prepare("SELECT usuario_pk, nome FROM tb_usuario WHERE login = :login AND senha = :senha ");
                 $stmt->execute(array(':login' => $login, ':senha' => $senha));
                 
                 $retorno = $stmt->fetchall(PDO::FETCH_ASSOC);
@@ -26,8 +26,12 @@
                     
                     foreach ($retorno as $row){
                         foreach ($row as $key => $value) {
-                            setcookie("PK_USUARIO_ATUAL", $value, time() + 30000);
-                            break;
+
+                            if ($key == 'usuario_pk') {
+                                setcookie("PK_USUARIO_ATUAL", $value, time() + 30000);
+                            } else if($key == 'nome') {
+                                setcookie("NOME_USUARIO_ATUAL", $value, time() + 30000);
+                            }
                         }
                     }
                     
@@ -46,9 +50,9 @@
                         $query = $conexao->prepare("INSERT INTO tb_curso_usuario (fk_usuario, fk_curso)
                                                    VALUES (:fkUsuario, :fkCurso)");
 
-                        $PkUsuario = json_decode($_COOKIE["PK_USUARIO_ATUAL"]);
+                        $pkUsuario = json_decode($_COOKIE["PK_USUARIO_ATUAL"]);
 
-                        $query->bindParam(":fkUsuario", $PkUsuario);
+                        $query->bindParam(":fkUsuario", $pkUsuario);
                         $query->bindParam(":fkCurso", $pkCursoParaFazer);
 
                         $cursoInserido = $query->execute();
@@ -118,6 +122,7 @@
         <div class="center">
             <h1>Cursos para curseiros</h1>
         </div>
+        <p> <a href="../index.html">Voltar para o inicio</a> </p>
     </header>
 
     <div class="container">
@@ -218,6 +223,7 @@
 
                                             <form action="certificado.php" method="post" target="_blank">
                                                 <input type="radio" name="concluir" value="<?php print_r($valores[0]);?>" required /> Concluir
+                                                <input type="hidden" name="nomeCurso" value="<?php print_r($valores[1]);?>" />
                                                 <div>
                                                     <button type="submit">Gerar certificado</button>
                                                 </div>

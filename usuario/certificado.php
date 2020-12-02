@@ -1,26 +1,24 @@
 <?php 
-//Carregando fontes TrueType
 
-//imagecreatefromjpeg(filename)
-$image = imagecreatefromjpeg("certificado.jpg");
 
-$titleColor = imagecolorallocate($image, 0, 0, 0);
-$gray = imagecolorallocate($image, 100, 100, 100);
+    $nomeCurso = "Curso legal";
 
-$font1= realpath('BevanRegular.ttf');
-$font2= realpath('PlayballRegular.ttf');
-//imagettftext(image, size, angle, x, y, color, fontfile, text)
+    if ( isset($_POST['nomeCurso']) && !empty($_POST['nomeCurso']) ) {
+        $nomeCurso = $_POST['nomeCurso'];
+    }
 
-imagettftext($image, 32, 0, 320, 250, $titleColor,$font1,"CERTIFICADO");
-imagettftext($image, 32, 0, 375, 350, $titleColor,$font2,"Carlos Zeve");
+    $image = imagecreatefrompng("../img/certificado.png");
+    
+    $cor = imagecolorallocate($image, 109, 48, 29);
+    $fontNomeUsuario = realpath('../css/Rochester-Regular.otf');
+    $fontNomeCurso = realpath('../css/Roboto-Regular.ttf');
 
-imagestring($image, 3, 440, 370, utf8_decode("Concluído em: ").date("d/m/Y"),$titleColor);
 
-header("Content-Type: image/jpeg");
+    imagefttext($image, 48, 0, 400, 380, $cor, $fontNomeUsuario, $_COOKIE["NOME_USUARIO_ATUAL"]);
+    imagettftext($image, 16, 0, 270, 228, $cor, $fontNomeCurso, $nomeCurso);
+    
+    header("Content-Type: image/png");
+    imagepng($image);
 
-imagejpeg($image);
-//imagejpeg($image, "certificado-".date("Y-m-d").".jpg");
-
-imagedestroy($image);
 
 ?>
