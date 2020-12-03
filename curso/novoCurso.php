@@ -51,6 +51,12 @@ if (isset($_POST) &&
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="../css/main.css">
+
+    <!-- Fonte: -->
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
     <title>Cursos para curseiros</title>
 </head>
 <body>
@@ -68,23 +74,23 @@ if (isset($_POST) &&
             <?php 
                 if (isset($msgErro)) {
             ?>  
-                <p class="erro center"> <?php echo "$msgErro" ?> </p>
-                <p class="erro center"> <a href="homeAdm.php"> Ir para cursos</a> </p>
+                <p class="center"> <?php echo "$msgErro" ?> </p>
+                <p class="center"> <a href="homeAdm.php"> Ir para cursos</a> </p>
 
             <?php
                 } else if($sucesso) {
             ?>
-                <p> <?php echo isset($nomeUsuario) ? "Curso $tituloNovoCurso inserido com sucesso!" : "Curso inserido" ?> </p>
+                <p class="center roxo"> <?php echo isset($nomeUsuario) ? "Curso $tituloNovoCurso inserido com sucesso!" : "Curso inserido" ?> </p>
 
             <?php
                 }
             ?>
 
-            <form enctype="multipart/form-data" action="novoCurso.php" method="post" class="center">
+            <form enctype="multipart/form-data" action="novoCurso.php" method="post" class="center novoCurso">
 
                 <input class="acessar center block" type="text" name="titulo" placeholder="Título" required>
-                <input type="file" name="imagemCurso" required>
-                <textarea maxlength= "200" name="descricao" rows="5" cols="33" placeholder="breve descrição sobre o curso " required></textarea>
+                <input class=" acessar center block" type="file" name="imagemCurso" required>
+                <textarea class="acessar center block" maxlength= "200" name="descricao" rows="5" cols="33" placeholder="breve descrição sobre o curso " required></textarea>
 
                 <div>
                     <button type="submit" class="botaoRoxo">Enviar</button>

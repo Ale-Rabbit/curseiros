@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="../css/main.css">
+
+    <!-- Fonte: -->
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <title>Cursos para curseiros</title>
 </head>
 <body>
@@ -30,7 +36,7 @@
 
                 <div class="block box-opcoes">
                     <input class="inlineBlock botaoRoxo limpar" type="reset" value="Limpar">
-                    <a href="novoAdm.php" class="inlineBlock botaoRoxo"><p>Novo cadastrar administrador</p></a>
+                    <a href="novoAdm.php" class="inlineBlock botaoRoxo"><p>Cadastrar</p></a>
                 </div>
                 
             </form>

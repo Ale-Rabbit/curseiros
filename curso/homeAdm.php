@@ -3,6 +3,7 @@
 
     $aparecerCadastrese = false;
     $vindoDaPaginaLogarAdm = isset($_POST['vindoDaPaginaLogarAdm']) && !(empty($_POST['vindoDaPaginaLogarAdm']));
+    $menosDeTresCursosNabase = false;
 
     try {
 
@@ -49,6 +50,11 @@
             $carregouCursos = false;
             if (isset($cursos) && !empty($cursos)) {
                 $carregouCursos = true;
+
+                if(sizeof($cursos) < 3) {
+                    $menosDeTresCursosNabase = true;
+                }
+
             } else {
                 $msgErro = "Ainda não possui nenhum curso cadastrado. Entre em contato com algum administrador";
             }
@@ -83,6 +89,11 @@
             $carregouCursos = false;
             if (isset($cursos) && !empty($cursos)) {
                 $carregouCursos = true;
+
+                if(sizeof($cursos) < 3) {
+                    $menosDeTresCursosNabase = true;
+                }
+
             } else {
                 $msgErro = "Ainda não possui nenhum curso cadastrado. Entre em contato com algum administrador";
             }
@@ -99,6 +110,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="../css/main.css">
+
+    <!-- Slide-->
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/js/splide.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/css/splide.min.css">
+
+    <!-- Fonte: -->
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
     <title>Cursos para curseiros</title>
 </head>
 <body>
@@ -109,55 +130,55 @@
         </div>
     </header>
 
-    <div class="container">
+    <section class="container">
 
         <div>
 
-            <div>
+            <div class="center">
 
                 <?php 
                     if ($aparecerCadastrese && isset($msgErro)) {
                 ?>
-                    <p class="erro center"> <?php echo "$msgErro" ?> </p>
-                    <p class="erro center"> <a href="loginAdm.php">tente novamente</a> ou </p>
-                    <p class="erro center"> <a href="novoAdm.php">faça um cadastro</a></p>
+                    <p class="vermelho center"> <?php echo "$msgErro" ?> </p>
+                    <p class="center"> <a href="loginAdm.php">tente novamente</a> ou </p>
+                    <p class="center"> <a href="novoAdm.php">faça um cadastro</a></p>
                 <?php
                     } elseif (isset($msgErroUsuarioComum)) {
                 ?>
-                <p class="erro center"> <?php echo "$msgErroUsuarioComum" ?> </p>
-                <p class="erro center"> <a href="../index.html">Voltar para página inicial</a></p>
+                <p class="center vermelho"> <?php echo "$msgErroUsuarioComum" ?> </p>
+                <p class="center"> <a href="../index.html">Voltar para página inicial</a></p>
                 <?php 
                     } elseif (isset($msgErro)) {
                 ?>
-                    <p class="erro center"> <?php echo "$msgErro" ?> </p>
-                    <p class="erro center"> <a href="../index.html">Voltar para página inicial</a></p>
+                    <p class="center vermelho"> <?php echo "$msgErro" ?> </p>
+                    <p class="center"> <a href="../index.html">Voltar para página inicial</a></p>
                     <a href="novoCurso.php" class="inlineBlock botaoRoxo"><p>Cadastrar novo curso</p></a>
                 <?php
                     } else {
                 ?>
-                    <h2>Todos os cursos</h2>
+                    <h2 class="center roxo">Todos os cursos</h2>
 
                     <?php 
                         if (isset($msgErro)) {
                     ?>
-                            <p class="erro center"> <?php echo "$msgErro" ?> </p>
+                            <p class="center vermelho"> <?php echo "$msgErro" ?> </p>
 
                     <?php 
                         }
                         if (isset($carregouCursos) && $carregouCursos) {
                     ?>
-                            <div>
+                            <div class="splide center cursos mb5">
         
-                                <form action="homeAdm.php" method="post">
+                                <form action="homeAdm.php" method="post" class="splide__track">
 
-                                    <ul>
+                                    <ul class="splide__list">
                                     <?php 
                                         foreach ($cursos as $row) {
                                         $valores = array_values($row);
                                     ?>
-                                            <li>
-                                                <input type="checkbox" name="apagar[]" value="<?php print_r($valores[0]);?>"/> Apagar
-                                                <h3><?php print_r($valores[1]);?></h3>
+                                            <li class="splide__slide">
+                                                <input type="checkbox" name="apagar[]" value="<?php print_r($valores[0]);?>"/> <b>Apagar</b>
+                                                <h3 class="roxo m10"><?php print_r($valores[1]);?></h3>
                                                 <div>
                                                     <img src="<?php print_r("data:image/png;base64,".$valores[3]);?>" alt="Imagem do curso">
                                                 </div>
@@ -170,17 +191,35 @@
                                     </ul>
         
                                     <div>
-                                        <button type="submit">Executar exclusões</button>
+                                        <button class="botaoRoxo center" id="botaoExcluirCursosSelecionados" type="submit">Executar exclusões</button>
                                     </div>
         
                                 </form>
         
                             </div>
 
+                            <?php
+                                    if ( isset($menosDeTresCursosNabase) && $menosDeTresCursosNabase) {
+                                ?>
+                                    <script> new Splide( '.splide.cursos' , {pagination: false} ).mount(); </script>
+                                <?php
+                                    } else {
+                                ?>
+                                        <script>
+                                            new Splide( '.splide.cursos', {
+                                                perPage: 3,
+                                                rewind: true,
+                                                pagination: false
+                                            } ).mount();
+                                        </script>
+                                <?php
+                                    }
+                                ?> 
+
                     <?php 
                         } else {
                     ?>
-                        <p class="erro center"> <?php echo isset($msgErro) ? "$msgErro" : ""; ?> </p>
+                        <p class="center vermelho"> <?php echo isset($msgErro) ? "$msgErro" : ""; ?> </p>
                     <?php
                         }
                     }
@@ -189,17 +228,16 @@
                     <?php 
                         if (!isset($msgErro)) {
                     ?>
-                            <!-- <a href="novoCurso.php" class="inlineBlock botaoRoxo"><p>Cadastrar novo curso</p></a> -->
+                            <a id="botaoCadastrarNovosCursos" href="novoCurso.php" class="inlineBlock botaoRoxo center"><p>Cadastrar novo curso</p></a>
                     <?php 
                         }
                     ?>
 
             </div>
 
-
         </div>
 
-    </div>
+    </section>
 
 </body>
 

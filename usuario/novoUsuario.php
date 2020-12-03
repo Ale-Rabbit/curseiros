@@ -63,7 +63,14 @@ if (isset($_POST) &&
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="../css/main.css">
+
+    <!-- Fonte: -->
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <title>Cursos para curseiros</title>
+
 </head>
 <body>
     
@@ -96,20 +103,20 @@ if (isset($_POST) &&
             <?php 
                 } elseif ($aparecerLogar && isset($msgErro)) {
             ?>
-                <p class="erro center"> <?php echo "$msgErro" ?> </p>
-                <p class="erro center"> <a href="loginUsuario.php"> Ir para login</a> </p>
+                <p class="center"> <?php echo "$msgErro" ?> </p>
+                <p class="center"> <a href="loginUsuario.php"> Ir para login</a> </p>
 
             <?php 
                 } elseif (isset($msgErro)) {
             ?>
-                <p class="erro center"> <?php echo "$msgErro" ?> </p>
+                <p class="center"> <?php echo "$msgErro" ?> </p>
 
             <?php
                 } else{
             ?>
                 <div>
-                    <h2 class="erro center"> Usuário cadastrado com sucesso. </h2>
-                    <p> <?php echo isset($nomeUsuario) ? "Parabéns, $nomeUsuario !" : "Parabéns!" ?> </p>
+                    <h2 class="center roxo"> Usuário cadastrado com sucesso. </h2>
+                    <p class="center roxo"> <?php echo isset($nomeUsuario) ? "Parabéns, $nomeUsuario !" : "Parabéns!" ?> </p>
                     
                     <p class="center"> <a href="loginUsuario.php"> Ir para login</a> </p>
                 </div>
