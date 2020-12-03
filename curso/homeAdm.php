@@ -130,7 +130,11 @@
         </div>
     </header>
 
-    <section class="container">
+    <section class="container containerhomeAdm">
+
+        <div>
+            <p class="right"> <a href="../index.html" class="linkRoxo voltar">Voltar para o inicio</a> </p>
+        </div>
 
         <div>
 
@@ -226,7 +230,7 @@
                     ?>
                     
                     <?php 
-                        if (!isset($msgErro)) {
+                        if (!isset($msgErro) && !(isset($msgErroUsuarioComum)) ) {
                     ?>
                             <a id="botaoCadastrarNovosCursos" href="novoCurso.php" class="inlineBlock botaoRoxo center"><p>Cadastrar novo curso</p></a>
                     <?php 

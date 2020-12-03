@@ -136,7 +136,8 @@ button, .botao {
     margin-bottom: 30px;
 }
 
-.containerhomeUsuario .voltar{
+.containerhomeUsuario .voltar,
+.containerhomeAdm .voltar{
     margin-right: 10px;
 }
 

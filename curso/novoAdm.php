@@ -122,7 +122,7 @@ if (isset($_POST) &&
             ?>
                 <div>
                     <h2 class="center"> Usuário administrador cadastrado com sucesso. </h2>
-                    <p> <?php echo isset($nomeUsuario) ? "Parabéns administrador, $nomeUsuario !" : "Parabéns!" ?> </p>
+                    <p class="center roxo"> <?php echo isset($nomeUsuario) ? "Parabéns administrador, $nomeUsuario !" : "Parabéns!" ?> </p>
                     
                     <p class="center"> <a href="loginAdm.php"> Ir para login</a> </p>
                 </div>
